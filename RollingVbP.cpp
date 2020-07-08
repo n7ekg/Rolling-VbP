@@ -10,6 +10,8 @@
    
    If you don't set the number of bars back, the study will simply set the end date and time to be current. This helps
    when you accidentally move the endpoint from the current date-time to something earlier.
+   
+   Copyright 2019, by Ed Carp. All rights reserved. Distribution without permission is prohibited.
 */
 
 SCDLLName("Rolling VbP v0.1c")
