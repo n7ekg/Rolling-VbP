@@ -14,7 +14,7 @@
    Copyright 2019, by Ed Carp. All rights reserved. Distribution without permission is prohibited.
 */
 
-SCDLLName("Rolling VbP v0.1c")
+SCDLLName("Rolling VbP v0.1d")
 
 /*==========================================================================*/
 SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
@@ -30,13 +30,13 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 	*/
 	char scratchmsg[255];
 
-	if (sc.HideStudy == 1)
+	if (sc.HideStudy == 1 || sc.GetBarHasClosedStatus(sc.Index) == BHCS_BAR_HAS_NOT_CLOSED)
 		return;
 	
 	// sc.AddMessageToLog("Startup", 1);
 	if (sc.SetDefaults)
 	{
-		sc.GraphName = "Rolling VbP v0.1c";
+		sc.GraphName = "Rolling VbP v0.1d";
 		sc.GraphRegion = 0;
 		sc.ValueFormat = VALUEFORMAT_INHERITED;
 		sc.ScaleRangeType = SCALE_SAMEASREGION;
