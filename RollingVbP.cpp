@@ -78,9 +78,9 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 	BarsBack = NumberOfBarsVisible.GetInt();
 	
 	backdate = sc.BaseDateTimeIn[sc.Index - BarsBack].GetDate();
-	backtime = modf(sc.BaseDateTimeIn[sc.Index - BarsBack], &date);
+	backtime = std::modf(sc.BaseDateTimeIn[sc.Index - BarsBack].GetAsDouble(), &date);
 	date = sc.BaseDateTimeIn[sc.Index].GetDate();
-	time = modf(sc.BaseDateTimeIn[sc.Index], &date);
+	time = std::modf(sc.BaseDateTimeIn[sc.Index].GetAsDouble(), &date);
 	
 	sc.GetStudyArrayUsingID(InputVbPStudy.GetStudyID(), InputVbPStudy.GetSubgraphIndex(), StudyPrice);
 	// Set start date and time to what it was NumberOfBarsVisible.GetInteger() ago
