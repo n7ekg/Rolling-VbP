@@ -14,13 +14,15 @@
    Copyright 2019, by Ed Carp. All rights reserved. Distribution without permission is prohibited.
 */
 
-SCDLLName("Rolling VbP v0.1d")
+SCDLLName("Rolling VbP v0.2")
 
 /*==========================================================================*/
 SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 {
 	SCInputRef InputVbPStudy = sc.Input[0]; // volume by price study
 	SCInputRef NumberOfBarsVisible = sc.Input[1];
+	SCInputRef ZigZagStudy = sc.Input[2];
+	SCInputRef UseZigZag = sc.Input[3];
 
 	//s_UseTool Tool;
 	/*
@@ -36,7 +38,7 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 	// sc.AddMessageToLog("Startup", 1);
 	if (sc.SetDefaults)
 	{
-		sc.GraphName = "Rolling VbP v0.1d";
+		sc.GraphName = "Rolling VbP v0.2";
 		sc.GraphRegion = 0;
 		sc.ValueFormat = VALUEFORMAT_INHERITED;
 		sc.ScaleRangeType = SCALE_SAMEASREGION;
@@ -47,10 +49,16 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 				
 		InputVbPStudy.Name = "VbP Study";
 		InputVbPStudy.SetStudySubgraphValues(1, 0);
+
+		ZigZagStudy.Name = "Zig-Zag Study";
+		ZigZagStudy.SetStudySubgraphValues(1, 0);
 		
 		NumberOfBarsVisible.Name = "Number Of Bars Visible";
 		NumberOfBarsVisible.SetInt(10);
 		NumberOfBarsVisible.SetIntLimits(0,2000);
+		
+		UseZigZag.Name = "Use Zig-Zag Study?";
+		UseZigZag.SetYesNo(1);
 
 		return;
 	}
@@ -70,6 +78,7 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 
 	int Index = sc.ArraySize - 1;
 	SCFloatArray StudyPrice;
+	SCFloatArray ZigZagData;
 	int BarsBack = 1;
 	float Zero = 0;
 	double date, time, backdate, backtime;
@@ -83,6 +92,35 @@ SCSFExport scsf_Rolling_VbP(SCStudyInterfaceRef sc)
 	time = std::modf(sc.BaseDateTimeIn[sc.Index].GetAsDouble(), &date);
 	
 	sc.GetStudyArrayUsingID(InputVbPStudy.GetStudyID(), InputVbPStudy.GetSubgraphIndex(), StudyPrice);
+	sc.GetStudyArrayUsingID(ZigZagStudy.GetStudyID(), ZigZagStudy.GetSubgraphIndex(), ZigZagData);
+	// BarsBack = ZigZagData[sc.Index];
+	// for (int Index = sc.UpdateStartIndex; Index < sc.ArraySize; Index++)
+	
+	/*	
+	for (int Index = sc.ArraySize; Index > 0; Index--)
+	{
+		if(ZigZagData[Index] > 0)
+		{
+			BarsBack = ZigZagData[Index];
+			Index = 0;
+		}
+	}
+	*/
+	if(UseZigZag.GetYesNo() == 1) // Use ZigZag = Yes
+	{
+		if(ZigZagData[sc.Index] > 0L) BarsBack = (int)ZigZagData[sc.Index] / 2;
+		NumberOfBarsVisible.SetInt(BarsBack);
+		/*
+		sprintf(scratchmsg, "ZZData=%f, BB=%d, USI=%d, AS=%d, IND=%d\n", ZigZagData[sc.Index], BarsBack, sc.UpdateStartIndex, sc.ArraySize, sc.Index);
+		sc.AddMessageToLog(scratchmsg, 1);
+		*/
+	}
+	
+	/*
+    sprintf(scratchmsg, "ZZData=%f, BB=%f, USI=%d, AS=%d, IND=%d\n", ZigZagData[sc.Index], BarsBack, sc.UpdateStartIndex, sc.ArraySize, sc.Index);
+    sc.AddMessageToLog(scratchmsg, 1);
+	*/
+
 	// Set start date and time to what it was NumberOfBarsVisible.GetInteger() ago
 	// If it's set to zero, just set the end date/time to 0 (current)
 	if (BarsBack > 0)
